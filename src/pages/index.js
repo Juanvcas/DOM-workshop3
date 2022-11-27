@@ -1,13 +1,21 @@
 import Head from 'next/head';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchGeo, fetchWeather } from '@hooks/useFetch';
 
 export default function Home() {
+   const [clean, setClean] = useState(false);
+
+   const cleanWeathers = () => {
+      const weatherCont = document.querySelector('#weathers-cont');
+      const weathersClean = document.querySelector('#weathers-clean');
+      weatherCont.innerHTML = '';
+      setClean(false);
+   };
+
    const addWeather = async (event) => {
       event.preventDefault();
       const weatherSearch = document.querySelector('#weather-search');
-      const weatherSubmit = document.querySelector('#weather-submit');
 
       if (weatherSearch.value) {
          const geolocation = await fetchGeo(weatherSearch.value);
@@ -16,26 +24,24 @@ export default function Home() {
             geolocation[0].lon
          );
 
-         const item = weather;
-
          const element = document.createElement('article');
          element.classList =
-            'flex flex-col items-center w-auto h-auto p-8 border rounded-xl';
+            'relative flex flex-col items-center w-auto h-auto p-8 border rounded-xl';
          element.innerHTML = `
             <h2 class="text-3xl font-bold">${
-               item.name
-            } - <span class="font-light">${item.sys.country}</span></h2>
-            <h3 class="text-2xl mt-6">${item.weather[0].main}</h3>
+               weather.name
+            } - <span class="font-light">${weather.sys.country}</span></h2>
+            <h3 class="text-2xl mt-6">${weather.weather[0].main}</h3>
             <p class="text-7xl font-black p-8">${(
-               item.main.temp - 273.15
+               weather.main.temp - 273.15
             ).toFixed(1)}<span class="text-3xl font-bold">°C</span></p>
-            <p class="text-2xl mt-2">${item.weather[0].description}</p>
+            <p class="text-2xl mt-2">${weather.weather[0].description}</p>
             `;
 
          const weatherCont = document.querySelector('#weathers-cont');
          weatherCont.appendChild(element);
 
-         console.log(weather);
+         setClean(true);
       } else {
          console.log('Please type a correct value');
       }
@@ -79,9 +85,19 @@ export default function Home() {
                         id="weather-submit"
                         onClick={(event) => addWeather(event)}
                      >
-                        Consultar
+                        Consult
                      </button>
                   </form>
+                  {clean && (
+                     <button
+                        name="weather search"
+                        className="flex justify-center items-center mt-8 w-1/5 h-16 text-2xl text-white bg-gray-700 rounded-xl"
+                        id="weathers-clean"
+                        onClick={cleanWeathers}
+                     >
+                        Clean
+                     </button>
+                  )}
                   <div
                      className="grid grid-cols-3 grid-rows-auto gap-4 w-full h-auto mt-16"
                      id="weathers-cont"
